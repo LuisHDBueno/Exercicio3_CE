@@ -30,11 +30,11 @@ if __name__ == "__main__":
     manager = mp.Manager()
     buffer_output = manager.Queue()
     reader = rd.Reader(n_threads=4, buffer_output=buffer_output)
+    manager_data = mp.Manager()
+    queue_data = manager_data.Queue()
+    mp.Process(target=reader.read_threaded, args=(queue_data,)).start()
     for data in cas.time_trigger(n=5, speed=1):
-        manager_data = mp.Manager()
-        queue_data = manager_data.Queue()
         for d in data:
             queue_data.put(d)
-        data_reader = reader.read_threaded(queue_data)
         while not buffer_output.empty():
             print(buffer_output.get())

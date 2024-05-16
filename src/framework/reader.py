@@ -1,4 +1,5 @@
 import multiprocessing as mp
+import regex as re
 
 class Reader():
     def __init__(self, n_threads=1, buffer_output: mp.Queue = None):
@@ -17,6 +18,28 @@ class Reader():
         self.threads_list = []
 
     @staticmethod
+    def transform(data: str, sep = ","):
+        """ Transform data into a list of columns.
+
+        :param data: Data to be transformed.
+        :type data: str
+        :param sep: Separator for the data, defaults to ","
+        :type sep: str, optional
+        :return: List of columns.
+        :rtype: list
+        """
+        data = data.split(sep)
+        columns = []
+        for col in data:
+            if re.match(r"^\d+$", col):
+                columns.append(int(col))
+            elif re.match(r"^\d+\.\d+$", col):
+                columns.append(float(col))
+            else:
+                columns.append(col)
+        return columns
+
+    @staticmethod
     def read(buffer_output: mp.Queue, requests: mp.Queue, sep = ","):
         """ Read data from a source.
 
@@ -27,12 +50,11 @@ class Reader():
         :param sep: Separator for the data, defaults to ","
         :type sep: str, optional
         """        
-        while not requests.empty():
+        while True:
             data = requests.get()
-            colums = data.split(sep)
+            colums = Reader.transform(data, sep)
             # fazer regex para verificar o formato dos dados
             buffer_output.put(colums)
-        print("fazer regex")
 
     def read_threaded(self, requests: mp.Queue):
         """ Split the reading process into multiple threads.
@@ -43,21 +65,3 @@ class Reader():
             t.start()
         for t in self.threads_list:
             t.join()
-
-if __name__ == "__main__":
-    import random
-    def randon_request(n = 100):
-        manager = mp.Manager()
-        requests = manager.Queue()
-        for _ in range(n):
-            requests.put(f"{random.randint(0, 100)},{random.randint(0, 100)}")
-        return requests
-    
-    manager = mp.Manager()
-    buffer_output = manager.Queue()
-    reader = Reader(n_threads=4, buffer_output=buffer_output)
-    reader.read_threaded(randon_request())
-    for _ in range(4):
-        data = buffer_output.get()
-        print(data)
-
