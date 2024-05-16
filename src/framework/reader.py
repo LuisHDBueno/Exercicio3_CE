@@ -51,6 +51,7 @@ class Reader():
         :type sep: str, optional
         """        
         while True:
+            print("teste")
             data = requests.get()
             colums = Reader.transform(data, sep)
             # fazer regex para verificar o formato dos dados
@@ -65,3 +66,10 @@ class Reader():
             t.start()
         for t in self.threads_list:
             t.join()
+
+
+if __name__ == "__main__":
+    reader = Reader(n_threads=4)
+    manager = mp.Manager()
+    buffer_output = manager.Queue()
+    reader.read_threaded(buffer_output)
