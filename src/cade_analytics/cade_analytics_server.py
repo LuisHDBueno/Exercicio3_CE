@@ -65,10 +65,11 @@ class CadeAnalyticsServer:
         
         while True:
             self.lock.acquire()
-            total_timestamps = sum(self.queue_time.queue)
-            n = len(self.queue_time.queue)
+            total_timestamps = 0
+            n = 0
             while not self.queue_time.empty():
-                self.queue_time.get()
+                total_timestamps += float(self.queue_time.get())
+                n+=1
             self.lock.release()
             handling_processes = []
             for _ in range(20):
@@ -93,7 +94,11 @@ class CadeAnalyticsServer:
             print(f"avg buys per minute: {managed_dict['avg_buys_per_minute']}")
 
             now = time.time()
-            print(f"avg time of requests: {((now*n)-total_timestamps) / n}")
+            if n==0:
+                avg_time = 0
+            else:
+                avg_time = ((now*n)-total_timestamps) / n
+            print(f"avg time of requests: {avg_time}")
     
 if __name__ == "__main__":
     cas = CadeAnalyticsServer()
