@@ -10,32 +10,35 @@ import src.framework.reader as rd
 import src.framework.handler as hd
 import cade_analytics_client as cac
 
+import grpc
+import datasender_pb2
+import datasender_pb2_grpc
+from concurrent import futures
 
 class CadeAnalyticsServer:
+    def __init__(self):
+        self.server = grpc.server(futures.ThreadPoolExecutor(max_workers=10))
+        datasender_pb2_grpc.add_DataSenderServicer_to_server(self, self.server)
+        self.server.add_insecure_port('0.0.0.0:50051')  # Listen on all available network interfaces
+        self.is_received = False
+        self.data = None
 
-    def comunication(self):
-        # AQUI É O MOCK DO CLIENTE TROCAR PELO CLIENTE REAL
-        client = cac.CadeAnalyticsClient()
-        yield client.get_data()
-
-    def add_data(self, queue_data):
-        while True:
-            data = self.comunication()
-            for d in data:
-                queue_data.put(d)
-                
-            time.sleep(10)
+    def Sender(self, request, context):
+        print(f"Received data")
+        received_data = request.data
+        self.is_received = True
+        self.queue_data.put(received_data)
+        return datasender_pb2.ConfirmData(check=1)
+            
 
     def run_simulation(self):
         manager = mp.Manager()
         buffer_output = manager.Queue()
         reader = rd.Reader(n_threads=5, buffer_output=buffer_output)
         manager_data = mp.Manager()
-        queue_data = manager_data.Queue()
-        data_process = mp.Process(target=self.add_data, args=(queue_data, ))
-        read_process = mp.Process(target=reader.read_threaded, args=(queue_data, ))
+        self.queue_data = manager_data.Queue()
+        read_process = mp.Process(target=reader.read_threaded, args=(self.queue_data, ))
 
-        data_process.start()
         read_process.start()
         
         managed_dict = manager.dict()
@@ -51,6 +54,8 @@ class CadeAnalyticsServer:
         managed_dict['avg_buys_per_minute'] = 0
         
         time.sleep(2)
+        
+        self.server.start()  # Add this line to start the gRPC server
         
         while True:
             handling_processes = []
