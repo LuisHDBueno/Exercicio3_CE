@@ -21,7 +21,7 @@ class CadeAnalyticsClient:
         self.stub = datasender_pb2_grpc.DataSenderStub(self.channel)
         print(self.channel)
 
-    def get_data(self, n:int = 100):
+    def get_data(self, n:int = 10000):
         str_list = [random.choice(self.data) for _ in range(n)]
         unified_string = '\n'.join(str_list)
         return unified_string

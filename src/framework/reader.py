@@ -2,7 +2,7 @@ import multiprocessing as mp
 import regex as re
 
 class Reader():
-    def __init__(self, n_threads=1, buffer_output: mp.Queue = None):
+    def __init__(self, n_threads=10, buffer_output: mp.Queue = None):
         """ Reader class to read data from a source.
 
         :param n_threads: Number of threads for a reader, defaults to 1
