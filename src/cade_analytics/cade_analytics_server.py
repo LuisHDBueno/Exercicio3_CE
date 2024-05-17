@@ -53,7 +53,9 @@ class CadeAnalyticsServer:
         managed_dict['avg_views_per_minute'] = 0
         managed_dict['avg_buys_per_minute'] = 0
         
-        time.sleep(2)
+        while self.queue_data.empty():
+            print("Server is idle, sleeping for 3 seconds")
+            time.sleep(3)
         
         self.server.start()  # Add this line to start the gRPC server
         
