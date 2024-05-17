@@ -1,0 +1,15 @@
+syntax = "proto3";
+
+package dataSender;
+
+service DataSender {
+  rpc Sender (SendData) returns (ConfirmData);
+}
+
+message SendData {
+  string data = 1;
+}
+
+message ConfirmData {
+  bool check = 1;
+}  
