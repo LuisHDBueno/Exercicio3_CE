@@ -19,6 +19,7 @@ class CadeAnalyticsClient:
         self.data = data
         self.channel = grpc.insecure_channel('localhost:50051', options=(('grpc.enable_http_proxy', 0),))
         self.stub = datasender_pb2_grpc.DataSenderStub(self.channel)
+        print(self.channel)
 
     def get_data(self, n:int = 100):
         str_list = [random.choice(self.data) for _ in range(n)]
@@ -26,11 +27,11 @@ class CadeAnalyticsClient:
         return unified_string
     
     def time_trigger(self, n:int = 100, speed:int = 1):
-        for i in range(10):
-            data = self.get_data(n)
-            response = self.stub.Sender(datasender_pb2.SendData(data=data))
-            time.sleep(speed)
-            print(f"Client {os.getpid()} sent {n} data points with response: {response.check}")
+        #for i in range(10):
+        data = self.get_data(n)
+        response = self.stub.Sender(datasender_pb2.SendData(data=data))
+        time.sleep(speed)
+        print(f"Client {os.getpid()} sent {n} data points with response: {response.check}")
 
 if __name__ == "__main__":
     if os.environ.get('https_proxy'):
@@ -42,7 +43,7 @@ if __name__ == "__main__":
     client_process = []
     for i in range(n_clients):
         client = CadeAnalyticsClient()
-        client_process.append(mp.Process(target=client.time_trigger, args=(100, 1)))
+        client_process.append(mp.Process(target=client.time_trigger, args=(10, 1)))
         client_process[i].start()
         print(f"Client {i} started")
     
