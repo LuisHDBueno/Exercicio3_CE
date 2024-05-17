@@ -31,7 +31,6 @@ class CadeAnalyticsServer:
         self.data = None
 
     def Sender(self, request, context):
-        print(f"Received data")
         received_data = request.data
         self.queue_data.put(received_data)
         
@@ -61,13 +60,10 @@ class CadeAnalyticsServer:
         managed_dict['avg_views_per_minute'] = 0
         managed_dict['avg_buys_per_minute'] = 0
         
-        # Wait for the queue to have data
-        while self.queue_data.empty():
-            # Just to be sure the server is running
-            print("Server is idle, sleeping for 3 seconds")
-            time.sleep(3)
-        
         self.server.start()  # Start the gRPC server
+        
+        # Wait for the queue to have data
+        time.sleep(3)
         
         # Run the analytics
         while True:
@@ -85,8 +81,11 @@ class CadeAnalyticsServer:
             for p in handling_processes:
                 p.join()
             
+            # Clear the terminal
+            os.system('cls' if os.name == 'nt' else 'clear')
+            
             # Report the results
-            print("===\n", f"most viewed items:\n{managed_dict['views_per_item'].head()}")
+            print("===\n", f"most viewed items:\n{managed_dict['views_per_item'].head()}\n")
             print(f"most bought items:\n{managed_dict['buys_per_item'].head()}", end="\n\n")
             
             print(f"min time viewed: {managed_dict['min_time_viewed']}")
