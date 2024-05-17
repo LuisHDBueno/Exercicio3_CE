@@ -55,8 +55,8 @@ class CadeAnalyticsServer:
         managed_dict['max_time_viewed'] = pd.Timestamp.min
         managed_dict['min_time_bought'] = pd.Timestamp.max
         managed_dict['max_time_bought'] = pd.Timestamp.min
-        managed_dict['num_views'] = 10e-6 # Avoid division by zero
-        managed_dict['num_buys'] = 10e-6 # Avoid division by zero
+        managed_dict['num_views'] = 0.1 # Avoid division by zero
+        managed_dict['num_buys'] = 0.1 # Avoid division by zero
         managed_dict['avg_views_per_minute'] = 0
         managed_dict['avg_buys_per_minute'] = 0
         

@@ -38,6 +38,7 @@ class Handler:
         
         # Some errors may occur, but they won't matter for the analytics
         self.df['timestamp'] = pd.to_datetime(self.df['timestamp'], format="%Y-%m-%d %H:%M:%S", errors='coerce')
+        self.df.dropna(inplace=True, how='any', subset=None)
         
         viewed = self.df[self.df["event"] == "view"].copy()
         bought = self.df[self.df["event"] == "buy"].copy()
@@ -73,6 +74,10 @@ class Handler:
         self.managed_dict["num_views"] += len(viewed)
         self.managed_dict["num_buys"] += len(bought)
         
+        if pd.isnull(timespan_viewed):
+            timespan_viewed = 1
+        if pd.isnull(timespan_bought):
+            timespan_bought = 1
         if timespan_viewed == 0:
             timespan_viewed = 1
         if timespan_bought == 0:
