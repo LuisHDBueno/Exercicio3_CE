@@ -30,7 +30,8 @@ def time_trigger(n:int = 100, speed:int = 1, server_address: str = '0.0.0.0:5005
     while True:
         client = CadeAnalyticsClient(server_address=server_address)
         data = client.get_data(n)
-        response = client.stub.Sender(datasender_pb2.SendData(data=data))
+        timestamp = str(time.time())
+        response = client.stub.Sender(datasender_pb2.SendData(data=data, begining=timestamp))
         time.sleep(speed)
         print(f"Client {os.getpid()} sent {n} data points with response: {response.check}")
 

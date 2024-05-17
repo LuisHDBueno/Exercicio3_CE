@@ -26,6 +26,8 @@ class CadeAnalyticsServer:
     def Sender(self, request, context):
         print(f"Received data")
         received_data = request.data
+        timestamp = request.begining
+        print(f"Received data from {timestamp}")
         self.is_received = True
         self.queue_data.put(received_data)
         return datasender_pb2.ConfirmData(check=1)
