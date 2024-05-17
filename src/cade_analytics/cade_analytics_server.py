@@ -19,7 +19,7 @@ class CadeAnalyticsServer:
     def __init__(self):
         self.server = grpc.server(futures.ThreadPoolExecutor(max_workers=10))
         datasender_pb2_grpc.add_DataSenderServicer_to_server(self, self.server)
-        self.server.add_insecure_port('[::]:50051')
+        self.server.add_insecure_port('0.0.0.0:50051')  # Listen on all available network interfaces
         self.is_received = False
         self.data = None
 

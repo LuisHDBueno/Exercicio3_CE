@@ -11,13 +11,13 @@ sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '../.
 import src.framework.reader as rd
 
 class CadeAnalyticsClient:
-    def __init__(self, path: str = "data/cade_analytics_data.txt"):
+    def __init__(self, path: str = "data/cade_analytics_data.txt", server_address: str = '0.0.0.0:50051'):
         self.path = path
         with open(path, "r") as f:
             data = f.readlines()
             data = [line.strip() for line in data]
         self.data = data
-        self.channel = grpc.insecure_channel('localhost:50051', options=(('grpc.enable_http_proxy', 0),))
+        self.channel = grpc.insecure_channel(server_address, options=(('grpc.enable_http_proxy', 0),))
         self.stub = datasender_pb2_grpc.DataSenderStub(self.channel)
         print(self.channel)
 
@@ -26,9 +26,9 @@ class CadeAnalyticsClient:
         unified_string = '\n'.join(str_list)
         return unified_string
     
-def time_trigger(n:int = 100, speed:int = 1):
+def time_trigger(n:int = 100, speed:int = 1, server_address: str = '0.0.0.0:50051'):
     while True:
-        client = CadeAnalyticsClient()
+        client = CadeAnalyticsClient(server_address=server_address)
         data = client.get_data(n)
         response = client.stub.Sender(datasender_pb2.SendData(data=data))
         time.sleep(speed)
@@ -41,9 +41,10 @@ if __name__ == "__main__":
         del os.environ['http_proxy']
 
     n_clients = 10
+    server_address = '192.168.43.242:50051'  # Ip do servidor, precisa ser trocado
     client_process = []
     for i in range(n_clients):
-        client_process.append(mp.Process(target=time_trigger, args=(10, 1)))
+        client_process.append(mp.Process(target=time_trigger, args=(10, 1, server_address)))
         client_process[i].start()
         print(f"Client {i} started")
     
