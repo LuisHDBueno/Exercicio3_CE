@@ -13,7 +13,7 @@ def run(num):
         num1=4
         num2=6
         try:
-            response = stub.Add(calculator_pb2.AddRequest(str=palavra))
+            response = stub.Add(calculator_pb2.AddRequest(num1=num1, num2=num2))
         except grpc.RpcError as e:
             print(e.details())
             raise e
