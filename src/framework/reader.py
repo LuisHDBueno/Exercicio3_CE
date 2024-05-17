@@ -52,6 +52,7 @@ class Reader():
         """        
         while True:
             data = requests.get()
+            data = data.split("\n")
             for line in data:
                 colums = Reader.transform(line, sep)
                 # fazer regex para verificar o formato dos dados

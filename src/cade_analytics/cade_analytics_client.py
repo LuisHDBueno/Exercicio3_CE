@@ -21,15 +21,16 @@ class CadeAnalyticsClient:
         self.stub = datasender_pb2_grpc.DataSenderStub(self.channel)
         print(self.channel)
 
-    def get_data(self, n:int = 10000):
+    def get_data(self, n:int = 1000):
         str_list = [random.choice(self.data) for _ in range(n)]
         unified_string = '\n'.join(str_list)
         return unified_string
     
-    def time_trigger(self, n:int = 100, speed:int = 1):
-        #for i in range(10):
-        data = self.get_data(n)
-        response = self.stub.Sender(datasender_pb2.SendData(data=data))
+def time_trigger(n:int = 100, speed:int = 1):
+    while True:
+        client = CadeAnalyticsClient()
+        data = client.get_data(n)
+        response = client.stub.Sender(datasender_pb2.SendData(data=data))
         time.sleep(speed)
         print(f"Client {os.getpid()} sent {n} data points with response: {response.check}")
 
@@ -39,11 +40,10 @@ if __name__ == "__main__":
     if os.environ.get('http_proxy'):
         del os.environ['http_proxy']
 
-    n_clients = 2
+    n_clients = 10
     client_process = []
     for i in range(n_clients):
-        client = CadeAnalyticsClient()
-        client_process.append(mp.Process(target=client.time_trigger, args=(10, 1)))
+        client_process.append(mp.Process(target=time_trigger, args=(10, 1)))
         client_process[i].start()
         print(f"Client {i} started")
     

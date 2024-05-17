@@ -55,6 +55,8 @@ class CadeAnalyticsServer:
         
         time.sleep(2)
         
+        self.server.start()  # Add this line to start the gRPC server
+        
         while True:
             handling_processes = []
             for _ in range(20):
