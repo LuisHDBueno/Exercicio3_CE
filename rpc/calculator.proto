@@ -7,8 +7,7 @@ service Calculator {
 }
 
 message AddRequest {
-  int32 num1 = 1;
-  int32 num2 = 2;
+  string palavra = 1;
 }
 
 message AddResponse {

@@ -5,13 +5,13 @@ import calculator_pb2_grpc
 
 class CalculatorServicer(calculator_pb2_grpc.CalculatorServicer):
     def Add(self, request, context):
-        """result = request.palavra.upper()
-        print(f"Received: {result}")"""
-        result = request.num1 + request.num2
-        """if result == "AAAAA":
+        result = request.palavra.upper()
+        print(f"Received: {result}")
+        #result = request.num1 + request.num2
+        if result == "AAAAA":
             return calculator_pb2.AddResponse(result=1)
-        return calculator_pb2.AddResponse(result=0)"""
-        return calculator_pb2.AddResponse(result=result)
+        return calculator_pb2.AddResponse(result=0)
+        #return calculator_pb2.AddResponse(result=result)
 
 def serve():
     server = grpc.server(futures.ThreadPoolExecutor(max_workers=10))
