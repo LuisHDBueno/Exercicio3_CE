@@ -29,18 +29,20 @@ class CadeAnalyticsServer:
         print(f"Received data")
         self.received_data = request.data
         self.is_received = True
+        self.queue_data.put(self.received_data)
         return datasender_pb2.ConfirmData(check=1)
 
-    def add_data(self, queue_data):
+    def add_data(self):
         self.comunication()
+        """
         while True:
             if self.is_received:
                 data = self.received_data
                 for d in data:
-                    queue_data.put(d)
+                    self.queue_data.put(d)
                 self.received = False
             else:
-                time.sleep(0.5)
+                time.sleep(0.5)"""
             
 
     def run_simulation(self):
@@ -48,9 +50,9 @@ class CadeAnalyticsServer:
         buffer_output = manager.Queue()
         reader = rd.Reader(n_threads=4, buffer_output=buffer_output)
         manager_data = mp.Manager()
-        queue_data = manager_data.Queue()
-        data_process = mp.Process(target=self.add_data, args=(queue_data, ))
-        read_process = mp.Process(target=reader.read_threaded, args=(queue_data, ))
+        self.queue_data = manager_data.Queue()
+        data_process = mp.Process(target=self.add_data, args=())
+        read_process = mp.Process(target=reader.read_threaded, args=(self.queue_data, ))
 
         data_process.start()
         read_process.start()
