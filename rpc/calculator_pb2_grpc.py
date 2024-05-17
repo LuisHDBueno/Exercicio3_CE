@@ -40,7 +40,7 @@ class CalculatorStub(object):
             channel: A grpc.Channel.
         """
         self.Add = channel.unary_unary(
-                '/calculator.Calculator/Add',
+                '/analytics.Calculator/Add',
                 request_serializer=calculator__pb2.AddRequest.SerializeToString,
                 response_deserializer=calculator__pb2.AddResponse.FromString,
                 _registered_method=True)
@@ -65,7 +65,7 @@ def add_CalculatorServicer_to_server(servicer, server):
             ),
     }
     generic_handler = grpc.method_handlers_generic_handler(
-            'calculator.Calculator', rpc_method_handlers)
+            'analytics.Calculator', rpc_method_handlers)
     server.add_generic_rpc_handlers((generic_handler,))
 
 
@@ -87,7 +87,7 @@ class Calculator(object):
         return grpc.experimental.unary_unary(
             request,
             target,
-            '/calculator.Calculator/Add',
+            '/analytics.Calculator/Add',
             calculator__pb2.AddRequest.SerializeToString,
             calculator__pb2.AddResponse.FromString,
             options,
