@@ -51,16 +51,16 @@ class Reader():
         :type sep: str, optional
         """        
         while True:
-            print("teste")
             data = requests.get()
-            colums = Reader.transform(data, sep)
-            # fazer regex para verificar o formato dos dados
-            buffer_output.put(colums)
+            for line in data:
+                colums = Reader.transform(line, sep)
+                # fazer regex para verificar o formato dos dados
+                buffer_output.put(colums)
 
     def read_threaded(self, requests: mp.Queue):
         """ Split the reading process into multiple threads.
         """
-        for i in range(self.n_threads):
+        for _ in range(self.n_threads):
             t = mp.Process(target=self.read, args=(self.buffer_output, requests))
             self.threads_list.append(t)
             t.start()
