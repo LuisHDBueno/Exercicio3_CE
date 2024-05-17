@@ -29,7 +29,7 @@ class CadeAnalyticsClient:
     def time_trigger(self, n:int = 100, speed:int = 1):
         #for i in range(10):
         data = self.get_data(n)
-        response = self.stub.Sender(datasender_pb2.SendData(data=data))
+        response = self.stub.Sender(datasender_pb2.SendData(data="oi"))
         time.sleep(speed)
         print(f"Client {os.getpid()} sent {n} data points with response: {response.check}")
 
