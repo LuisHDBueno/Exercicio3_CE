@@ -15,7 +15,7 @@ class CadeAnalyticsClient:
             data = [line.strip() for line in data]
         self.data = data
 
-    def get_data(self, n:int = 1000):
+    def get_data(self, n:int = 10000):
         return [random.choice(self.data) for _ in range(n)]
     
     def time_trigger(self, n:int = 100, speed:int = 1):

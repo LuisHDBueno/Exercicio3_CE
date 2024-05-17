@@ -50,6 +50,8 @@ class CadeAnalyticsServer:
         managed_dict['avg_views_per_minute'] = 0
         managed_dict['avg_buys_per_minute'] = 0
         
+        time.sleep(2)
+        
         while True:
             handling_processes = []
             for _ in range(20):
@@ -73,10 +75,6 @@ class CadeAnalyticsServer:
             print(f"avg views per minute: {managed_dict['avg_views_per_minute']}")
             print(f"avg buys per minute: {managed_dict['avg_buys_per_minute']}")
     
-        
-        data_process.join()
-        read_process.join()
-
 if __name__ == "__main__":
     cas = CadeAnalyticsServer()
     cas.run_simulation()

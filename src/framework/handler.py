@@ -11,7 +11,7 @@ class Handler:
     def queue_to_dataframe(self):
         data_list = []
         
-        while not self.data.empty() or len(data_list) < 100:
+        while not self.data.empty():
             data_list.append(self.data.get())
     
         self.df = pd.DataFrame(data_list, columns=["tag", "timestamp", "visitor_id", "event", "item_id"])
