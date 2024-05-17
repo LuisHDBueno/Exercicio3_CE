@@ -42,7 +42,7 @@ if __name__ == "__main__":
         del os.environ['http_proxy']
 
     n_clients = 10
-    server_address = '192.168.133.246:50051'  # Ip do servidor, precisa ser trocado
+    server_address = '192.168.0.84:50051'  # Ip do servidor, precisa ser trocado
     client_process = []
     for i in range(n_clients):
         client_process.append(mp.Process(target=time_trigger, args=(10, 1, server_address)))

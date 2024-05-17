@@ -22,6 +22,7 @@ class CadeAnalyticsServer:
         self.server.add_insecure_port('0.0.0.0:50051')  # Listen on all available network interfaces
         self.is_received = False
         self.data = None
+        self.lock = mp.Lock()
 
     def Sender(self, request, context):
         print(f"Received data")
@@ -29,6 +30,9 @@ class CadeAnalyticsServer:
         timestamp = request.begining
         print(f"Received data from {timestamp}")
         self.is_received = True
+        self.lock.acquire()
+        self.queue_time.put(timestamp)
+        self.lock.release()
         self.queue_data.put(received_data)
         return datasender_pb2.ConfirmData(check=1)
             
@@ -40,7 +44,7 @@ class CadeAnalyticsServer:
         manager_data = mp.Manager()
         self.queue_data = manager_data.Queue()
         read_process = mp.Process(target=reader.read_threaded, args=(self.queue_data, ))
-
+        self.queue_time = manager_data.Queue()
         read_process.start()
         
         managed_dict = manager.dict()
@@ -60,6 +64,12 @@ class CadeAnalyticsServer:
         self.server.start()  # Add this line to start the gRPC server
         
         while True:
+            self.lock.acquire()
+            total_timestamps = sum(self.queue_time.queue)
+            n = len(self.queue_time.queue)
+            while not self.queue_time.empty():
+                self.queue_time.get()
+            self.lock.release()
             handling_processes = []
             for _ in range(20):
                 handling_processes.append(mp.Process(target=hd.Handler(data=buffer_output, managed_dict=managed_dict).handle_data))
@@ -81,6 +91,9 @@ class CadeAnalyticsServer:
             
             print(f"avg views per minute: {managed_dict['avg_views_per_minute']}")
             print(f"avg buys per minute: {managed_dict['avg_buys_per_minute']}")
+
+            now = time.time()
+            print(f"avg time of requests: {((now*n)-total_timestamps) / n}")
     
 if __name__ == "__main__":
     cas = CadeAnalyticsServer()
