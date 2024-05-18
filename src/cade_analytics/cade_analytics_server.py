@@ -16,7 +16,11 @@ import datasender_pb2_grpc
 from concurrent import futures
 
 class CadeAnalyticsServer:
+    """Class to handle the server of the cade analytics system.	
+    """
     def __init__(self):
+        """Initialize the server.
+        """
         self.server = grpc.server(futures.ThreadPoolExecutor(max_workers=10))
         datasender_pb2_grpc.add_DataSenderServicer_to_server(self, self.server)
         self.server.add_insecure_port('0.0.0.0:50051')  # Listen on all available network interfaces
@@ -25,6 +29,15 @@ class CadeAnalyticsServer:
         self.lock = mp.Lock()
 
     def Sender(self, request, context):
+        """Method to receive data from the client.
+
+        :param request: Request from the client.
+        :type request: datasender_pb2.SendData
+        :param context: Context of the request.
+        :type context: grpc._server._Context
+        :return: Confirmation of the data received.
+        :rtype: datasender_pb2.ConfirmData
+        """
         received_data = request.data
         timestamp = request.begining
         self.is_received = True
@@ -36,6 +49,8 @@ class CadeAnalyticsServer:
             
 
     def run_simulation(self):
+        """Method to run the simulation of the cade analytics system.
+        """
         manager = mp.Manager()
         buffer_output = manager.Queue()
         reader = rd.Reader(n_threads=5, buffer_output=buffer_output)
