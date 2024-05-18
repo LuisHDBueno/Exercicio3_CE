@@ -11,7 +11,16 @@ sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '../.
 import src.framework.reader as rd
 
 class CadeAnalyticsClient:
+    """Class to handle the client of the cade analytics system.
+    """
     def __init__(self, path: str = "data/cade_analytics_data.txt", server_address: str = '0.0.0.0:50051'):
+        """Initialize the client.
+
+        :param path: Path to the data file, defaults to "data/cade_analytics_data.txt"
+        :type path: str, optional
+        :param server_address: Address of the server, defaults to '
+        :type server_address: str, optional
+        """
         self.path = path
         with open(path, "r") as f:
             data = f.readlines()
@@ -22,11 +31,27 @@ class CadeAnalyticsClient:
         print(self.channel)
 
     def get_data(self, n:int = 1000):
+        """Get data from the client.
+
+        :param n: Number of data points to get, defaults to 1000
+        :type n: int, optional
+        :return: Data points.
+        :rtype: str
+        """
         str_list = [random.choice(self.data) for _ in range(n)]
         unified_string = '\n'.join(str_list)
         return unified_string
     
 def time_trigger(n:int = 100, speed:int = 1, server_address: str = '0.0.0.0:50051'):
+    """Trigger the client to send data.
+
+    :param n: Number of data points to send, defaults to 100
+    :type n: int, optional
+    :param speed: Speed of sending data, defaults to 1
+    :type speed: int, optional
+    :param server_address: Address of the server, defaults to '
+    :type server_address: str, optional
+    """
     while True:
         client = CadeAnalyticsClient(server_address=server_address)
         data = client.get_data(n)
