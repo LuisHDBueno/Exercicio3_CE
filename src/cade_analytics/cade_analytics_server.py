@@ -22,11 +22,15 @@ class CadeAnalyticsServer:
         self.server.add_insecure_port('0.0.0.0:50051')  # Listen on all available network interfaces
         self.is_received = False
         self.data = None
+        self.lock = mp.Lock()
 
     def Sender(self, request, context):
-        print(f"Received data")
         received_data = request.data
+        timestamp = request.begining
         self.is_received = True
+        self.lock.acquire()
+        self.queue_time.put(timestamp)
+        self.lock.release()
         self.queue_data.put(received_data)
         return datasender_pb2.ConfirmData(check=1)
             
@@ -38,7 +42,7 @@ class CadeAnalyticsServer:
         manager_data = mp.Manager()
         self.queue_data = manager_data.Queue()
         read_process = mp.Process(target=reader.read_threaded, args=(self.queue_data, ))
-
+        self.queue_time = manager_data.Queue()
         read_process.start()
         
         managed_dict = manager.dict()
@@ -56,18 +60,27 @@ class CadeAnalyticsServer:
         time.sleep(2)
         
         self.server.start()  # Add this line to start the gRPC server
-        
+        time_history = []
+        time_start_history = time.time() - 10
+        machine_numbers = 1
         while True:
+            self.lock.acquire()
+            total_timestamps = 0
+            n = 0
+            while not self.queue_time.empty():
+                total_timestamps += float(self.queue_time.get())
+                n+=1
+            self.lock.release()
             handling_processes = []
             for _ in range(20):
-                handling_processes.append(mp.Process(target=hd.Handler(data=buffer_output, managed_dict=managed_dict).handle_data))
+                handling_processes.append(mp.Process(target=hd.handle_data, args=(buffer_output, managed_dict, )))
                 
             for p in handling_processes:
                 p.start()
-                
+            
             for p in handling_processes:
                 p.join()
-            
+
             print(f"most viewed items:\n{managed_dict['views_per_item'].head()}")
             print(f"most bought items:\n{managed_dict['buys_per_item'].head()}")
             
@@ -76,9 +89,22 @@ class CadeAnalyticsServer:
             
             print(f"min time bought: {managed_dict['min_time_bought']}")
             print(f"max time bought: {managed_dict['max_time_bought']}")
-            
-            print(f"avg views per minute: {managed_dict['avg_views_per_minute']}")
-            print(f"avg buys per minute: {managed_dict['avg_buys_per_minute']}")
+
+
+            now = time.time()
+            if n==0:
+                avg_time = 0
+            else:
+                avg_time = ((now*n)-total_timestamps) / n
+            print(f"avg time of requests: {avg_time}")
+            if now-time_start_history > 50:
+                time_history.append(avg_time)
+                time_start_history = now
+                machine_numbers += 1
+
+            if machine_numbers == 21:
+                with open("time_history2.txt", "w") as f:
+                    f.write("\n".join([str(t) for t in time_history]))
     
 if __name__ == "__main__":
     cas = CadeAnalyticsServer()

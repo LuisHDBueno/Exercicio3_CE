@@ -30,7 +30,8 @@ def time_trigger(n:int = 100, speed:int = 1, server_address: str = '0.0.0.0:5005
     while True:
         client = CadeAnalyticsClient(server_address=server_address)
         data = client.get_data(n)
-        response = client.stub.Sender(datasender_pb2.SendData(data=data))
+        timestamp = str(time.time())
+        response = client.stub.Sender(datasender_pb2.SendData(data=data, begining=timestamp))
         time.sleep(speed)
         print(f"Client {os.getpid()} sent {n} data points with response: {response.check}")
 
@@ -40,13 +41,14 @@ if __name__ == "__main__":
     if os.environ.get('http_proxy'):
         del os.environ['http_proxy']
 
-    n_clients = 10
-    server_address = '192.168.43.242:50051'  # Ip do servidor, precisa ser trocado
+    n_clients = 20
+    server_address = '192.168.0.71:50051'  # Ip do servidor, precisa ser trocado
     client_process = []
     for i in range(n_clients):
-        client_process.append(mp.Process(target=time_trigger, args=(10, 1, server_address)))
+        client_process.append(mp.Process(target=time_trigger, args=(100, 1, server_address)))
         client_process[i].start()
         print(f"Client {i} started")
+        time.sleep(50)
     
     for i in range(n_clients):
         client_process[i].join()

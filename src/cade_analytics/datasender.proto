@@ -8,6 +8,7 @@ service DataSender {
 
 message SendData {
   string data = 1;
+  string begining = 2;
 }
 
 message ConfirmData {
