@@ -45,7 +45,7 @@ if __name__ == "__main__":
     server_address = '192.168.0.71:50051'  # Ip do servidor, precisa ser trocado
     client_process = []
     for i in range(n_clients):
-        client_process.append(mp.Process(target=time_trigger, args=(10, 1, server_address)))
+        client_process.append(mp.Process(target=time_trigger, args=(100, 1, server_address)))
         client_process[i].start()
         print(f"Client {i} started")
         time.sleep(50)

@@ -56,10 +56,6 @@ class CadeAnalyticsServer:
         managed_dict['num_buys'] = 0
         managed_dict['avg_views_per_minute'] = 0
         managed_dict['avg_buys_per_minute'] = 0
-
-        managed_list = manager.list()
-        managed_list.append(0)
-        managed_list.append(0)
         
         time.sleep(2)
         
@@ -77,7 +73,7 @@ class CadeAnalyticsServer:
             self.lock.release()
             handling_processes = []
             for _ in range(20):
-                handling_processes.append(mp.Process(target=hd.Handler(data=buffer_output, managed_dict=managed_dict).handle_data, args=(managed_list,)))
+                handling_processes.append(mp.Process(target=hd.handle_data, args=(buffer_output, managed_dict, )))
                 
             for p in handling_processes:
                 p.start()
@@ -93,9 +89,7 @@ class CadeAnalyticsServer:
             
             print(f"min time bought: {managed_dict['min_time_bought']}")
             print(f"max time bought: {managed_dict['max_time_bought']}")
-            
-            print(f"avg views per minute: {managed_list[0]}")
-            print(f"avg buys per minute: {managed_list[1]}")
+
 
             now = time.time()
             if n==0:
