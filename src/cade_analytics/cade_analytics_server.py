@@ -25,10 +25,8 @@ class CadeAnalyticsServer:
         self.lock = mp.Lock()
 
     def Sender(self, request, context):
-        print(f"Received data")
         received_data = request.data
         timestamp = request.begining
-        print(f"Received data from {timestamp}")
         self.is_received = True
         self.lock.acquire()
         self.queue_time.put(timestamp)
@@ -58,11 +56,17 @@ class CadeAnalyticsServer:
         managed_dict['num_buys'] = 0
         managed_dict['avg_views_per_minute'] = 0
         managed_dict['avg_buys_per_minute'] = 0
+
+        managed_list = manager.list()
+        managed_list.append(0)
+        managed_list.append(0)
         
         time.sleep(2)
         
         self.server.start()  # Add this line to start the gRPC server
-        
+        time_history = []
+        time_start_history = time.time() - 10
+        machine_numbers = 1
         while True:
             self.lock.acquire()
             total_timestamps = 0
@@ -73,14 +77,14 @@ class CadeAnalyticsServer:
             self.lock.release()
             handling_processes = []
             for _ in range(20):
-                handling_processes.append(mp.Process(target=hd.Handler(data=buffer_output, managed_dict=managed_dict).handle_data))
+                handling_processes.append(mp.Process(target=hd.Handler(data=buffer_output, managed_dict=managed_dict).handle_data, args=(managed_list,)))
                 
             for p in handling_processes:
                 p.start()
-                
+            
             for p in handling_processes:
                 p.join()
-            
+
             print(f"most viewed items:\n{managed_dict['views_per_item'].head()}")
             print(f"most bought items:\n{managed_dict['buys_per_item'].head()}")
             
@@ -90,8 +94,8 @@ class CadeAnalyticsServer:
             print(f"min time bought: {managed_dict['min_time_bought']}")
             print(f"max time bought: {managed_dict['max_time_bought']}")
             
-            print(f"avg views per minute: {managed_dict['avg_views_per_minute']}")
-            print(f"avg buys per minute: {managed_dict['avg_buys_per_minute']}")
+            print(f"avg views per minute: {managed_list[0]}")
+            print(f"avg buys per minute: {managed_list[1]}")
 
             now = time.time()
             if n==0:
@@ -99,6 +103,14 @@ class CadeAnalyticsServer:
             else:
                 avg_time = ((now*n)-total_timestamps) / n
             print(f"avg time of requests: {avg_time}")
+            if now-time_start_history > 50:
+                time_history.append(avg_time)
+                time_start_history = now
+                machine_numbers += 1
+
+            if machine_numbers == 21:
+                with open("time_history2.txt", "w") as f:
+                    f.write("\n".join([str(t) for t in time_history]))
     
 if __name__ == "__main__":
     cas = CadeAnalyticsServer()

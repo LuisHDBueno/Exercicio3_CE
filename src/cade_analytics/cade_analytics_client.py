@@ -41,13 +41,14 @@ if __name__ == "__main__":
     if os.environ.get('http_proxy'):
         del os.environ['http_proxy']
 
-    n_clients = 10
-    server_address = '192.168.0.84:50051'  # Ip do servidor, precisa ser trocado
+    n_clients = 20
+    server_address = '192.168.0.71:50051'  # Ip do servidor, precisa ser trocado
     client_process = []
     for i in range(n_clients):
         client_process.append(mp.Process(target=time_trigger, args=(10, 1, server_address)))
         client_process[i].start()
         print(f"Client {i} started")
+        time.sleep(50)
     
     for i in range(n_clients):
         client_process[i].join()

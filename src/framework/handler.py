@@ -16,7 +16,7 @@ class Handler:
     
         self.df = pd.DataFrame(data_list, columns=["tag", "timestamp", "visitor_id", "event", "item_id"])
 
-    def handle_data(self):
+    def handle_data(self, managed_list):
         self.queue_to_dataframe()
 
         # Preprocessing
@@ -55,10 +55,12 @@ class Handler:
         self.managed_dict["num_views"] += len(viewed)
         self.managed_dict["num_buys"] += len(bought)
         
-        if timespan_viewed == 0:
+        if abs(timespan_viewed) <= 10e-5:
             timespan_viewed = 1
-        if timespan_bought == 0:
+        if abs(timespan_bought) <= 10e-5:
             timespan_bought = 1
-        
-        self.managed_dict["avg_views_per_minute"] = self.managed_dict["num_views"] / timespan_viewed
-        self.managed_dict["avg_buys_per_minute"] = self.managed_dict["num_buys"] / timespan_bought
+        avg_views = float(self.managed_dict["num_views"]) / timespan_viewed
+        avg_buys = float(self.managed_dict["num_buys"]) / timespan_bought
+
+        managed_list[0] = avg_views
+        managed_list[1] = avg_buys
